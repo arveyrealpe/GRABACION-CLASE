@@ -1,0 +1,1105 @@
+<title>Bitácora de Clase</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2B5FA8">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#F3F4F0;
+    --surface:#FFFFFF;
+    --surface-2:#ECEDE8;
+    --ink:#1C232C;
+    --ink-soft:#5B6472;
+    --ink-faint:#8A93A0;
+    --border:#DDDCD2;
+    --accent:#2B5FA8;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E4ECF7;
+    --live:#C1432F;
+    --live-soft:#F8E3DE;
+    --ok:#2F7A52;
+    --shadow:0 1px 2px rgba(28,35,44,.06), 0 6px 20px rgba(28,35,44,.06);
+    --radius:14px;
+    --radius-sm:9px;
+    font-size:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171B;
+      --surface:#1C2027;
+      --surface-2:#242933;
+      --ink:#ECEEF1;
+      --ink-soft:#A7AFBC;
+      --ink-faint:#727B89;
+      --border:#2C313B;
+      --accent:#6FA0E0;
+      --accent-ink:#0E1116;
+      --accent-soft:#233248;
+      --live:#E38068;
+      --live-soft:#3A2420;
+      --ok:#6FBF93;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14171B;
+    --surface:#1C2027;
+    --surface-2:#242933;
+    --ink:#ECEEF1;
+    --ink-soft:#A7AFBC;
+    --ink-faint:#727B89;
+    --border:#2C313B;
+    --accent:#6FA0E0;
+    --accent-ink:#0E1116;
+    --accent-soft:#233248;
+    --live:#E38068;
+    --live-soft:#3A2420;
+    --ok:#6FBF93;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    padding-inline:16px;
+    padding-block:18px 40px;
+    min-height:100%;
+  }
+  h1,h2,h3{
+    font-family:"IBM Plex Serif", Georgia, serif;
+    font-weight:600;
+    margin:0;
+    text-wrap:balance;
+  }
+  .mono, .time, input.mono{
+    font-family:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-variant-numeric:tabular-nums;
+  }
+  button{font-family:inherit;}
+  ::selection{background:var(--accent-soft);}
+
+  a{color:var(--accent);}
+
+  .topbar{
+    max-width:1080px;margin:0 auto 20px auto;
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    flex-wrap:wrap;
+  }
+  .topbar h1{font-size:1.5rem;}
+  .topbar .tag{
+    font-family:"IBM Plex Sans";font-size:.78rem;color:var(--ink-soft);
+    border:1px solid var(--border);padding:3px 9px;border-radius:999px;
+  }
+
+  .app{
+    max-width:1080px;margin:0 auto;
+    display:grid;grid-template-columns:250px 1fr;gap:18px;
+    align-items:start;
+  }
+  @media (max-width:800px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{order:2;}
+    .main{order:1;}
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+
+  /* ---- sidebar ---- */
+  .sidebar{padding:14px;display:flex;flex-direction:column;gap:10px;}
+  .sidebar h2{font-size:.95rem;color:var(--ink-soft);font-family:"IBM Plex Sans";font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .class-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;padding-right:2px;}
+  .class-item{
+    display:flex;flex-direction:column;gap:2px;
+    text-align:left;background:transparent;border:1px solid transparent;
+    border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;
+  }
+  .class-item:hover{background:var(--surface-2);}
+  .class-item.active{background:var(--accent-soft);border-color:var(--accent);}
+  .class-item .ct-title{font-size:.92rem;font-weight:600;color:var(--ink);}
+  .class-item .ct-meta{font-size:.76rem;color:var(--ink-faint);}
+  .badge-demo{
+    display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--ok);background:transparent;
+    border:1px solid var(--ok);border-radius:999px;padding:1px 6px;margin-left:6px;
+  }
+  .btn-new{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--surface-2);border:1px dashed var(--border);color:var(--ink-soft);
+    border-radius:var(--radius-sm);padding:9px;cursor:pointer;font-size:.88rem;font-weight:600;
+  }
+  .btn-new:hover{border-color:var(--accent);color:var(--accent);}
+
+  .sidebar-help{font-size:.78rem;color:var(--ink-faint);line-height:1.5;border-top:1px solid var(--border);padding-top:10px;}
+
+  /* ---- main ---- */
+  .main{display:flex;flex-direction:column;gap:16px;}
+  .class-head{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+  .class-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .class-title-input{
+    font-family:"IBM Plex Serif";font-size:1.3rem;font-weight:600;color:var(--ink);
+    border:1px solid transparent;background:transparent;border-radius:var(--radius-sm);
+    padding:4px 6px;flex:1;min-width:160px;
+  }
+  .class-title-input:hover{border-color:var(--border);}
+  .class-title-input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+  .class-date{font-size:.8rem;color:var(--ink-faint);}
+
+  .rec-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .rec-btn{
+    display:flex;align-items:center;gap:10px;
+    background:var(--live);color:#fff;border:none;border-radius:999px;
+    padding:12px 22px;font-size:1rem;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 14px rgba(193,67,47,.35);
+  }
+  .rec-btn .dot{width:12px;height:12px;border-radius:3px;background:#fff;display:block;}
+  .rec-btn.recording .dot{border-radius:50%;animation:pulse 1.4s ease-in-out infinite;}
+  .rec-btn.idle{background:var(--accent);box-shadow:0 4px 14px rgba(43,95,168,.3);}
+  .rec-btn.idle .dot{border-radius:50%;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+  .rec-status{font-size:.86rem;color:var(--ink-soft);}
+  .rec-status.live{color:var(--live);font-weight:600;}
+
+  .lang-select{
+    font-size:.82rem;color:var(--ink-soft);background:var(--surface-2);
+    border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;
+  }
+
+  details.settings{font-size:.82rem;color:var(--ink-soft);}
+  details.settings summary{cursor:pointer;font-weight:600;padding:2px 0;}
+  .settings-body{display:flex;flex-direction:column;gap:8px;padding-top:8px;}
+  .settings-body label{display:flex;flex-direction:column;gap:4px;}
+  .settings-body input[type=range]{width:100%;}
+
+  .support-warning{
+    background:var(--live-soft);border:1px solid var(--live);color:var(--ink);
+    border-radius:var(--radius-sm);padding:10px 12px;font-size:.85rem;
+  }
+
+  /* ---- live panel ---- */
+  .live-panel{padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+  .live-panel h3{font-size:.95rem;color:var(--ink-soft);font-family:"IBM Plex Sans";font-weight:600;}
+  .live-box{
+    min-height:70px;max-height:260px;overflow-y:auto;
+    background:var(--surface-2);border-radius:var(--radius-sm);padding:12px;
+    font-size:.94rem;line-height:1.65;
+  }
+  .live-box .seg{margin:0 0 6px 0;}
+  .live-box .seg .time{color:var(--ink-faint);font-size:.72rem;margin-right:8px;}
+  .live-box .interim{color:var(--ink-faint);font-style:italic;}
+  .live-box .placeholder{color:var(--ink-faint);}
+
+  .suggestion{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius-sm);
+    padding:9px 12px;font-size:.86rem;
+  }
+  .suggestion .actions{display:flex;gap:8px;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--surface-2);color:var(--ink);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:8px 12px;font-size:.84rem;font-weight:600;cursor:pointer;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+  .btn.primary:hover{opacity:.92;color:var(--accent-ink);}
+  .btn.subtle{background:transparent;border-color:transparent;color:var(--ink-faint);padding:6px 8px;}
+  .btn.subtle:hover{color:var(--live);}
+  .btn svg{width:15px;height:15px;flex:none;}
+
+  /* ---- topics list ---- */
+  .topics{display:flex;flex-direction:column;gap:12px;}
+  .topic-card{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+  .topic-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .topic-title-wrap{flex:1;min-width:160px;}
+  .topic-title{
+    font-family:"IBM Plex Serif";font-weight:600;font-size:1.05rem;color:var(--ink);
+    border:1px solid transparent;background:transparent;border-radius:var(--radius-sm);
+    padding:2px 5px;width:100%;
+  }
+  .topic-title:hover{border-color:var(--border);}
+  .topic-title:focus{outline:none;border-color:var(--accent);background:var(--surface-2);}
+  .topic-meta{font-size:.76rem;color:var(--ink-faint);padding:2px 5px;}
+
+  .field-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:4px;display:block;}
+  textarea{
+    width:100%;font-family:"IBM Plex Sans";font-size:.9rem;line-height:1.55;color:var(--ink);
+    background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:9px 10px;resize:vertical;
+  }
+  textarea:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+  textarea.transcript-area{max-height:220px;min-height:70px;}
+  textarea.summary-area{min-height:60px;}
+
+  .empty-state{padding:34px 18px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .empty-state p{color:var(--ink-soft);font-size:.92rem;max-width:36ch;}
+
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;
+    font-size:.85rem;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s;
+    z-index:50;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;}
+
+  .footer-note{max-width:1080px;margin:26px auto 0 auto;font-size:.76rem;color:var(--ink-faint);text-align:center;line-height:1.6;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+
+<div class="topbar">
+  <h1>Bitácora de Clase</h1>
+  <span class="tag">graba · organiza por temas · resume · exporta</span>
+</div>
+
+<div class="app">
+  <aside class="sidebar panel">
+    <h2>Mis clases</h2>
+    <div class="class-list" id="classList"></div>
+    <button class="btn-new" id="btnNewClass" type="button">+ Nueva clase</button>
+    <div class="sidebar-help">
+      Tus clases se guardan solo en este dispositivo (este navegador). Usa "Exportar datos" para pasar una clase a tu otro dispositivo, o exporta a Word/PDF cuando termines.
+    </div>
+  </aside>
+
+  <main class="main" id="mainArea"></main>
+</div>
+
+<div class="footer-note">
+  La transcripción usa el reconocimiento de voz de tu navegador (funciona mejor en Chrome, con conexión a internet). Los resúmenes se generan en tu propio dispositivo, sin enviar el texto a ningún servicio externo.
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- icons ---------------- */
+  const ICO = {
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+    download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14"/></svg>',
+    magic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M4.5 4.5l2 2M17.5 17.5l2 2M3 12h3M18 12h3M4.5 19.5l2-2M17.5 6.5l2-2"/><circle cx="12" cy="12" r="2.3"/></svg>',
+    upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9m0 0l-4 4m4-4l4 4M5 5h14"/></svg>'
+  };
+
+  /* ---------------- stopwords (es) ---------------- */
+  const STOP = new Set(("de la que el en y a los del se las por un para con no una su al lo como mas pero sus le ya o este si porque esta entre cuando muy sin sobre tambien me hasta hay donde quien desde todo nos durante todos uno les ni contra otros ese eso ante ellos e esto mi antes algunos que si mismo yo tambien tu te ti tus tuyo ellas nosotros vosotros vosotras os mio mia mios mias tuyo tuya tuyos tuyas suyo suya suyos suyas nuestro nuestra nuestros nuestras vuestro vuestra vuestros vuestras esos esas estoy esta estamos estais estan este estes estemos esteis esten estare estaras estara estaremos estareis estaran estaria estarias estariamos estariais estarian era eras eramos erais eran fui fue fuimos fueron sea seas seamos seais sean sido siendo tengo tiene tenemos teneis tienen habia hemos han ha he son soy eres somos sois esa ese pues bien asi cada dos tres bueno buena hoy aqui alli entonces mientras luego despues ademas cual cuales quienes cuyo cuya cuyos cuyas segun aunque sino mas menos casi solo solamente toda todas nunca siempre tal tan tanto cada otra otro otras cierto cierta").split(" "));
+
+  /* ---------------- state ---------------- */
+  const LS_KEY = "bitacora-clases-v1";
+  let state = { classes: [], currentClassId: null };
+  let uiSettings = { lang: "es-CO", pauseSec: 12 };
+
+  let recognition = null;
+  let isRecording = false;
+  let currentTopicId = null;
+  let recordingStartedAt = null;
+  let lastSpeechTime = 0;
+  let suggestionActive = false;
+  let watchTimer = null;
+
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+
+  function todayLabel(iso){
+    try{
+      const d = new Date(iso);
+      return d.toLocaleDateString("es-CO", { day:"numeric", month:"short", year:"numeric" });
+    }catch(e){ return iso; }
+  }
+
+  function fmtTime(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return String(m).padStart(2,"0") + ":" + String(r).padStart(2,"0");
+  }
+
+  function wordCount(str){
+    return (str.trim().match(/\S+/g) || []).length;
+  }
+
+  function topicText(topic){
+    return topic.segments.map(s=>s.text).join(" ");
+  }
+
+  function save(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+    catch(e){ /* storage puede fallar en modo privado; seguimos igual */ }
+  }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.classes) && parsed.classes.length){
+          state = parsed;
+          return true;
+        }
+      }
+    }catch(e){}
+    return false;
+  }
+
+  function toast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>t.classList.remove("show"), 3200);
+  }
+
+  /* ---------------- demo data ---------------- */
+  function demoClass(){
+    return {
+      id: "demo-1",
+      title: "Ejemplo: Modelo Relacional (demo)",
+      demo: true,
+      dateISO: new Date(Date.now()-86400000*3).toISOString(),
+      recordingStartedAt: null,
+      topics: [
+        {
+          id: uid(), title: "Introducción a bases de datos relacionales",
+          startMs: 0, endMs: 262000,
+          summary: "El modelo relacional organiza los datos en tablas compuestas por filas y columnas. Cada tabla representa una entidad y cada fila es un registro único identificado por una clave primaria.",
+          segments: [
+            {time:"00:04", text:"Hoy vamos a hablar del modelo relacional, que es la base de la mayoría de los sistemas de bases de datos que usamos hoy en día."},
+            {time:"00:22", text:"En este modelo, la información se organiza en tablas, y cada tabla representa una entidad del mundo real, por ejemplo clientes, productos o pedidos."},
+            {time:"00:47", text:"Cada tabla está compuesta por filas y columnas, donde las columnas son los atributos y cada fila es un registro individual."},
+            {time:"01:15", text:"Este modelo fue propuesto por Edgar Codd en 1970 y sigue siendo el estándar en la mayoría de motores de bases de datos como Oracle, PostgreSQL o MySQL."},
+            {time:"03:40", text:"La ventaja principal es que permite reducir la redundancia y mantener la integridad de los datos mediante relaciones bien definidas entre tablas."}
+          ]
+        },
+        {
+          id: uid(), title: "Claves primarias y foráneas",
+          startMs: 262000, endMs: 520000,
+          summary: "La clave primaria identifica de forma única cada registro de una tabla y no puede repetirse ni quedar vacía. La clave foránea conecta una tabla con otra y protege la integridad referencial.",
+          segments: [
+            {time:"04:22", text:"La clave primaria es un campo, o conjunto de campos, que identifica de manera única cada registro dentro de una tabla."},
+            {time:"04:50", text:"No puede haber dos filas con la misma clave primaria, y tampoco puede quedar vacía, eso se llama integridad de entidad."},
+            {time:"05:30", text:"La clave foránea, en cambio, es un campo que hace referencia a la clave primaria de otra tabla, y así se establece la relación entre ambas."},
+            {time:"06:10", text:"Gracias a la clave foránea, el motor de base de datos puede impedir que se borre un cliente que todavía tiene pedidos asociados, eso es la integridad referencial."}
+          ]
+        },
+        {
+          id: uid(), title: "Normalización (1FN, 2FN, 3FN)",
+          startMs: 520000, endMs: 760000,
+          summary: "La normalización reduce la redundancia de datos aplicando reglas progresivas: la primera forma normal elimina grupos repetidos, la segunda elimina dependencias parciales y la tercera elimina dependencias transitivas.",
+          segments: [
+            {time:"08:41", text:"La normalización es un proceso para organizar las tablas y reducir la redundancia de información."},
+            {time:"09:05", text:"La primera forma normal exige que cada columna tenga valores atómicos, es decir, que no haya listas ni grupos repetidos dentro de una misma celda."},
+            {time:"09:50", text:"La segunda forma normal elimina las dependencias parciales, cuando un atributo depende solo de una parte de una clave compuesta."},
+            {time:"10:35", text:"La tercera forma normal elimina las dependencias transitivas, cuando un atributo depende de otro atributo que no es la clave."},
+            {time:"12:15", text:"En la práctica, casi siempre buscamos que nuestras tablas cumplan al menos hasta la tercera forma normal."}
+          ]
+        }
+      ]
+    };
+  }
+
+  /* ---------------- summarizer ---------------- */
+  function summarizeTopic(topic){
+    const segs = topic.segments;
+    if(!segs.length) return "";
+    if(segs.length <= 3) return segs.map(s=>s.text).join(" ");
+
+    const freq = Object.create(null);
+    segs.forEach(s=>{
+      (s.text.toLowerCase().match(/[a-záéíóúñü]+/g) || []).forEach(w=>{
+        if(w.length < 4 || STOP.has(w)) return;
+        freq[w] = (freq[w]||0) + 1;
+      });
+    });
+
+    const scored = segs.map((s, i)=>{
+      const words = (s.text.toLowerCase().match(/[a-záéíóúñü]+/g) || []);
+      let score = 0;
+      words.forEach(w=>{ if(freq[w]) score += freq[w]; });
+      score = words.length ? score / Math.sqrt(words.length) : 0;
+      return { i, s, score };
+    });
+
+    const k = Math.max(2, Math.min(6, Math.round(segs.length*0.4)));
+    const top = scored.slice().sort((a,b)=>b.score-a.score).slice(0,k).sort((a,b)=>a.i-b.i);
+    return top.map(t=>t.s.text).join(" ");
+  }
+
+  /* ---------------- rendering ---------------- */
+  function currentClass(){
+    return state.classes.find(c=>c.id === state.currentClassId) || null;
+  }
+
+  function renderClassList(){
+    const wrap = document.getElementById("classList");
+    wrap.innerHTML = "";
+    if(!state.classes.length){
+      wrap.innerHTML = '<div style="font-size:.82rem;color:var(--ink-faint);padding:6px 4px;">Aún no tienes clases.</div>';
+      return;
+    }
+    state.classes.slice().sort((a,b)=> new Date(b.dateISO) - new Date(a.dateISO)).forEach(c=>{
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "class-item" + (c.id === state.currentClassId ? " active" : "");
+      el.innerHTML = '<span class="ct-title">'+escapeHtml(c.title)+(c.demo ? '<span class="badge-demo">ejemplo</span>' : '')+'</span>'
+        + '<span class="ct-meta">'+todayLabel(c.dateISO)+' · '+c.topics.length+' tema'+(c.topics.length===1?'':'s')+'</span>';
+      el.addEventListener("click", ()=>{
+        if(isRecording){ toast("Detén la grabación antes de cambiar de clase."); return; }
+        state.currentClassId = c.id;
+        currentTopicId = null;
+        save();
+        renderAll();
+      });
+      wrap.appendChild(el);
+    });
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement("div");
+    d.textContent = str == null ? "" : str;
+    return d.innerHTML;
+  }
+
+  function renderMain(){
+    const main = document.getElementById("mainArea");
+    const cls = currentClass();
+    if(!cls){
+      main.innerHTML = '<div class="panel empty-state">'
+        + '<h3>Ninguna clase seleccionada</h3>'
+        + '<p>Crea una clase nueva para empezar a grabar, o elige una de la lista.</p>'
+        + '</div>';
+      return;
+    }
+
+    const speechOk = ("webkitSpeechRecognition" in window) || ("SpeechRecognition" in window);
+
+    let html = "";
+
+    html += '<div class="panel class-head">';
+    html += '  <div class="class-title-row">';
+    html += '    <input class="class-title-input" id="classTitleInput" value="'+escapeHtml(cls.title)+'">';
+    html += '  </div>';
+    html += '  <div class="class-date">'+todayLabel(cls.dateISO)+(cls.demo?' · clase de ejemplo':'')+'</div>';
+
+    if(!speechOk){
+      html += '<div class="support-warning">Tu navegador no soporta reconocimiento de voz en vivo. Usa Chrome o Edge (en Android o en tu portátil) para grabar y transcribir. Aun así puedes escribir temas y resúmenes a mano, o exportar esta clase.</div>';
+    } else {
+      html += '  <div class="rec-row">';
+      html += '    <button class="rec-btn '+(isRecording?'recording':'idle')+'" id="btnRec" type="button"><span class="dot"></span>'+(isRecording?'Detener':'Grabar clase')+'</button>';
+      html += '    <span class="rec-status'+(isRecording?' live':'')+'" id="recStatus">'+(isRecording?'Escuchando…':'En pausa')+'</span>';
+      html += '    <select class="lang-select" id="langSelect" '+(isRecording?'disabled':'')+'>';
+      [["es-CO","Español (Colombia)"],["es-MX","Español (México)"],["es-ES","Español (España)"],["es-419","Español (Latinoamérica)"],["en-US","English (US)"]].forEach(([v,l])=>{
+        html += '<option value="'+v+'" '+(uiSettings.lang===v?"selected":"")+'>'+l+'</option>';
+      });
+      html += '    </select>';
+      html += '  </div>';
+      html += '  <details class="settings"><summary>Ajustes de detección automática de temas</summary>';
+      html += '    <div class="settings-body">';
+      html += '      <label>Pausa para sugerir un nuevo tema: <b class="mono" id="pauseLabel">'+uiSettings.pauseSec+'s</b>';
+      html += '        <input type="range" min="6" max="30" step="1" id="pauseRange" value="'+uiSettings.pauseSec+'">';
+      html += '      </label>';
+      html += '    </div>';
+      html += '  </details>';
+    }
+    html += '</div>';
+
+    if(speechOk){
+      html += '<div class="panel live-panel">';
+      html += '  <h3>Tema actual en vivo</h3>';
+      html += '  <div class="live-box" id="liveBox"><p class="placeholder">Presiona "Grabar clase" para empezar a transcribir.</p></div>';
+      html += '  <div class="suggestion" id="suggestionBox" style="display:none;">';
+      html += '    <span>Hubo una pausa larga. ¿Empezamos un tema nuevo aquí?</span>';
+      html += '    <span class="actions"><button class="btn primary" id="btnSugYes" type="button">Sí, nuevo tema</button><button class="btn" id="btnSugNo" type="button">No, continuar</button></span>';
+      html += '  </div>';
+      html += '  <div class="btn-row">';
+      html += '    <button class="btn" id="btnManualTopic" type="button">'+ICO.plus+' Nuevo tema manual</button>';
+      html += '  </div>';
+      html += '</div>';
+    } else {
+      html += '<div class="panel" style="padding:14px 16px;">';
+      html += '  <div class="btn-row"><button class="btn" id="btnManualTopic" type="button">'+ICO.plus+' Agregar tema manual</button></div>';
+      html += '</div>';
+    }
+
+    html += '<div class="topics" id="topicsList"></div>';
+
+    if(cls.topics.length){
+      html += '<div class="panel" style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">';
+      html += '  <div class="field-label">Exportar clase completa</div>';
+      html += '  <div class="btn-row">';
+      html += '    <button class="btn primary" id="btnExportDocx" type="button">'+ICO.download+' Word (.docx)</button>';
+      html += '    <button class="btn primary" id="btnExportPdf" type="button">'+ICO.download+' PDF</button>';
+      html += '    <button class="btn" id="btnExportJson" type="button">'+ICO.download+' Exportar datos (.json)</button>';
+      html += '    <button class="btn" id="btnImportJson" type="button">'+ICO.upload+' Importar datos (.json)</button>';
+      html += '    <input type="file" id="importFile" accept="application/json" class="visually-hidden">';
+      html += '  </div>';
+      html += '</div>';
+    }
+
+    main.innerHTML = html;
+
+    renderTopics();
+    wireMainEvents();
+  }
+
+  function renderTopics(){
+    const cls = currentClass();
+    const wrap = document.getElementById("topicsList");
+    if(!wrap) return;
+    wrap.innerHTML = "";
+    const closedTopics = cls.topics.filter(t => t.id !== currentTopicId);
+    if(!closedTopics.length && !currentTopicId){
+      wrap.innerHTML = '<div class="panel empty-state"><p>Los temas que grabes (o que agregues manualmente) aparecerán aquí, con su transcripción y resumen.</p></div>';
+      return;
+    }
+    closedTopics.slice().reverse().forEach(t=>{
+      const card = document.createElement("div");
+      card.className = "topic-card panel";
+      const dur = fmtTime((t.endMs||0) - (t.startMs||0));
+      const wc = wordCount(topicText(t));
+      card.innerHTML =
+        '<div class="topic-head">'
+        + '  <div class="topic-title-wrap">'
+        + '    <input class="topic-title" data-topic="'+t.id+'" data-field="title" value="'+escapeHtml(t.title)+'">'
+        + '    <div class="topic-meta mono">'+dur+' · '+wc+' palabras</div>'
+        + '  </div>'
+        + '  <button class="btn subtle" data-action="delete-topic" data-topic="'+t.id+'" type="button" title="Eliminar tema">'+ICO.trash+'</button>'
+        + '</div>'
+        + '<div>'
+        + '  <span class="field-label">Resumen</span>'
+        + '  <textarea class="summary-area" data-topic="'+t.id+'" data-field="summary" placeholder="Aún no hay resumen.">'+escapeHtml(t.summary||"")+'</textarea>'
+        + '  <div class="btn-row" style="margin-top:6px;"><button class="btn" data-action="summarize" data-topic="'+t.id+'" type="button">'+ICO.magic+' '+(t.summary?'Regenerar resumen':'Generar resumen')+'</button></div>'
+        + '</div>'
+        + '<div>'
+        + '  <span class="field-label">Transcripción (puedes corregir el texto)</span>'
+        + '  <textarea class="transcript-area" data-topic="'+t.id+'" data-field="transcript">'+escapeHtml(t.segments.map(s=>'['+s.time+'] '+s.text).join("\n"))+'</textarea>'
+        + '</div>';
+      wrap.appendChild(card);
+    });
+  }
+
+  function wireMainEvents(){
+    const cls = currentClass();
+
+    const titleInput = document.getElementById("classTitleInput");
+    if(titleInput){
+      titleInput.addEventListener("change", ()=>{
+        cls.title = titleInput.value.trim() || "Clase sin título";
+        cls.demo = false;
+        save(); renderClassList();
+      });
+    }
+
+    const langSelect = document.getElementById("langSelect");
+    if(langSelect){
+      langSelect.addEventListener("change", ()=>{ uiSettings.lang = langSelect.value; });
+    }
+
+    const pauseRange = document.getElementById("pauseRange");
+    if(pauseRange){
+      pauseRange.addEventListener("input", ()=>{
+        uiSettings.pauseSec = parseInt(pauseRange.value,10);
+        document.getElementById("pauseLabel").textContent = uiSettings.pauseSec+"s";
+      });
+    }
+
+    const btnRec = document.getElementById("btnRec");
+    if(btnRec){ btnRec.addEventListener("click", toggleRecording); }
+
+    const btnManualTopic = document.getElementById("btnManualTopic");
+    if(btnManualTopic){
+      btnManualTopic.addEventListener("click", ()=>{
+        const speechOkNow = ("webkitSpeechRecognition" in window) || ("SpeechRecognition" in window);
+        if(speechOkNow){ startNewTopic(true); }
+        else { addStandaloneTopic(); }
+      });
+    }
+
+    const btnSugYes = document.getElementById("btnSugYes");
+    if(btnSugYes){ btnSugYes.addEventListener("click", ()=>{ hideSuggestion(); startNewTopic(true); }); }
+    const btnSugNo = document.getElementById("btnSugNo");
+    if(btnSugNo){ btnSugNo.addEventListener("click", hideSuggestion); }
+
+    const btnExportDocx = document.getElementById("btnExportDocx");
+    if(btnExportDocx){ btnExportDocx.addEventListener("click", exportDocx); }
+    const btnExportPdf = document.getElementById("btnExportPdf");
+    if(btnExportPdf){ btnExportPdf.addEventListener("click", exportPdf); }
+    const btnExportJson = document.getElementById("btnExportJson");
+    if(btnExportJson){ btnExportJson.addEventListener("click", exportJson); }
+    const btnImportJson = document.getElementById("btnImportJson");
+    const importFile = document.getElementById("importFile");
+    if(btnImportJson && importFile){
+      btnImportJson.addEventListener("click", ()=> importFile.click());
+      importFile.addEventListener("change", importJson);
+    }
+
+    const wrap = document.getElementById("topicsList");
+    if(wrap){
+      wrap.addEventListener("click", (e)=>{
+        const btn = e.target.closest("button[data-action]");
+        if(!btn) return;
+        const topicId = btn.getAttribute("data-topic");
+        const topic = cls.topics.find(t=>t.id===topicId);
+        if(!topic) return;
+        if(btn.dataset.action === "delete-topic"){
+          if(confirm('¿Eliminar el tema "'+topic.title+'"? Esta acción no se puede deshacer.')){
+            cls.topics = cls.topics.filter(t=>t.id!==topicId);
+            save(); renderTopics(); renderClassList();
+          }
+        } else if(btn.dataset.action === "summarize"){
+          topic.summary = summarizeTopic(topic);
+          save(); renderTopics();
+        }
+      });
+      wrap.addEventListener("change", (e)=>{
+        const el = e.target.closest("[data-field]");
+        if(!el) return;
+        const topicId = el.getAttribute("data-topic");
+        const topic = cls.topics.find(t=>t.id===topicId);
+        if(!topic) return;
+        const field = el.getAttribute("data-field");
+        if(field === "title"){
+          topic.title = el.value.trim() || "Tema sin título";
+        } else if(field === "summary"){
+          topic.summary = el.value;
+        } else if(field === "transcript"){
+          const lines = el.value.split("\n").map(l=>l.trim()).filter(Boolean);
+          topic.segments = lines.map(line=>{
+            const m = line.match(/^\[(\d{2}:\d{2})\]\s*(.*)$/);
+            return m ? {time:m[1], text:m[2]} : {time:"", text:line};
+          });
+        }
+        save();
+        if(field==="title") renderClassList();
+      });
+    }
+  }
+
+  /* ---------------- topic / recording flow ---------------- */
+  function ensureRecordingStart(cls){
+    if(!cls.recordingStartedAt){
+      cls.recordingStartedAt = Date.now();
+    }
+    recordingStartedAt = cls.recordingStartedAt;
+  }
+
+  function addStandaloneTopic(){
+    const cls = currentClass();
+    if(!cls) return;
+    const topic = {
+      id: uid(),
+      title: "Tema " + (cls.topics.length+1),
+      startMs: 0, endMs: 0,
+      summary: "",
+      segments: []
+    };
+    cls.topics.push(topic);
+    save();
+    renderTopics();
+  }
+
+  function startNewTopic(fromCurrent){
+    const cls = currentClass();
+    if(!cls) return;
+    const now = Date.now();
+    if(fromCurrent && currentTopicId){
+      const prev = cls.topics.find(t=>t.id===currentTopicId);
+      if(prev){
+        prev.endMs = recordingStartedAt ? (now - recordingStartedAt) : (prev.endMs||0);
+        if(!prev.summary && prev.segments.length) prev.summary = summarizeTopic(prev);
+      }
+    }
+    if(fromCurrent && currentTopicId){
+      const prev = cls.topics.find(t=>t.id===currentTopicId);
+      if(prev && !prev.segments.length){
+        cls.topics = cls.topics.filter(t=>t.id!==prev.id);
+      }
+    }
+    const topic = {
+      id: uid(),
+      title: "Tema " + (cls.topics.length+1),
+      startMs: recordingStartedAt ? (now - recordingStartedAt) : 0,
+      endMs: recordingStartedAt ? (now - recordingStartedAt) : 0,
+      summary: "",
+      segments: []
+    };
+    cls.topics.push(topic);
+    currentTopicId = topic.id;
+    save();
+    renderTopics();
+    clearLiveBox();
+  }
+
+  function clearLiveBox(){
+    const box = document.getElementById("liveBox");
+    if(box) box.innerHTML = '<p class="placeholder">Escuchando… empieza a hablar.</p>';
+  }
+
+  function appendSegment(text){
+    const cls = currentClass();
+    if(!cls || !currentTopicId) return;
+    const topic = cls.topics.find(t=>t.id===currentTopicId);
+    if(!topic) return;
+    const elapsed = recordingStartedAt ? (Date.now()-recordingStartedAt) : 0;
+    const seg = { time: fmtTime(elapsed), text: text.trim() };
+    if(!seg.text) return;
+    topic.segments.push(seg);
+    topic.endMs = elapsed;
+    save();
+
+    const box = document.getElementById("liveBox");
+    if(box){
+      const placeholder = box.querySelector(".placeholder");
+      if(placeholder) placeholder.remove();
+      const p = document.createElement("p");
+      p.className = "seg";
+      p.innerHTML = '<span class="time mono">'+seg.time+'</span>'+escapeHtml(seg.text);
+      box.appendChild(p);
+      box.scrollTop = box.scrollHeight;
+    }
+  }
+
+  function updateInterim(text){
+    const box = document.getElementById("liveBox");
+    if(!box) return;
+    let el = box.querySelector(".interim");
+    if(!text){ if(el) el.remove(); return; }
+    if(!el){
+      el = document.createElement("p");
+      el.className = "interim";
+      box.appendChild(el);
+    }
+    const placeholder = box.querySelector(".placeholder");
+    if(placeholder) placeholder.remove();
+    el.textContent = text;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function showSuggestion(){
+    if(suggestionActive) return;
+    suggestionActive = true;
+    const box = document.getElementById("suggestionBox");
+    if(box) box.style.display = "flex";
+  }
+  function hideSuggestion(){
+    suggestionActive = false;
+    const box = document.getElementById("suggestionBox");
+    if(box) box.style.display = "none";
+  }
+
+  function watchSilence(){
+    clearInterval(watchTimer);
+    watchTimer = setInterval(()=>{
+      if(!isRecording || suggestionActive || !currentTopicId) return;
+      const cls = currentClass();
+      const topic = cls && cls.topics.find(t=>t.id===currentTopicId);
+      if(!topic || topic.segments.length < 1) return;
+      const gap = Date.now() - lastSpeechTime;
+      if(gap > uiSettings.pauseSec*1000){
+        showSuggestion();
+      }
+    }, 2000);
+  }
+
+  /* ---------------- speech recognition ---------------- */
+  function getRecognitionCtor(){
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+
+  function toggleRecording(){
+    if(isRecording){ stopRecording(); } else { startRecording(); }
+  }
+
+  function startRecording(){
+    const Ctor = getRecognitionCtor();
+    if(!Ctor){ toast("Tu navegador no soporta reconocimiento de voz."); return; }
+    const cls = currentClass();
+    if(!cls) return;
+
+    ensureRecordingStart(cls);
+    if(!currentTopicId){ startNewTopic(false); }
+
+    recognition = new Ctor();
+    recognition.lang = uiSettings.lang;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function(event){
+      lastSpeechTime = Date.now();
+      if(suggestionActive) hideSuggestion();
+      let interim = "";
+      for(let i=event.resultIndex;i<event.results.length;i++){
+        const res = event.results[i];
+        if(res.isFinal){ appendSegment(res[0].transcript); }
+        else { interim += res[0].transcript; }
+      }
+      updateInterim(interim);
+    };
+    recognition.onerror = function(event){
+      if(event.error === "not-allowed" || event.error === "service-not-allowed"){
+        toast("No se pudo acceder al micrófono. Revisa los permisos del navegador.");
+        isRecording = false;
+        renderMain();
+      }
+      // otros errores (no-speech, network) se recuperan solos en onend
+    };
+    recognition.onend = function(){
+      if(isRecording){
+        try{ recognition.start(); }
+        catch(e){ setTimeout(()=>{ if(isRecording){ try{recognition.start();}catch(e2){} } }, 400); }
+      }
+    };
+
+    try{
+      recognition.start();
+      isRecording = true;
+      lastSpeechTime = Date.now();
+      watchSilence();
+      renderMain();
+    }catch(e){
+      toast("No se pudo iniciar la grabación.");
+    }
+  }
+
+  function stopRecording(){
+    isRecording = false;
+    clearInterval(watchTimer);
+    hideSuggestion();
+    if(recognition){
+      try{ recognition.onend = null; recognition.stop(); }catch(e){}
+    }
+    const cls = currentClass();
+    if(cls && currentTopicId){
+      const topic = cls.topics.find(t=>t.id===currentTopicId);
+      if(topic){
+        if(!topic.segments.length){
+          cls.topics = cls.topics.filter(t=>t.id!==topic.id);
+        } else if(!topic.summary){
+          topic.summary = summarizeTopic(topic);
+        }
+      }
+    }
+    currentTopicId = null;
+    save();
+    renderMain();
+  }
+
+  /* ---------------- export: docx ---------------- */
+  async function exportDocx(){
+    const cls = currentClass();
+    if(!cls || typeof docx === "undefined"){ toast("No se pudo cargar el generador de Word."); return; }
+    try{
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+      const children = [];
+      children.push(new Paragraph({ heading: HeadingLevel.TITLE, children:[ new TextRun(cls.title) ] }));
+      children.push(new Paragraph({ children:[ new TextRun({ text:"Fecha: "+todayLabel(cls.dateISO), italics:true }) ] }));
+
+      cls.topics.forEach((t, idx)=>{
+        children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing:{before:300}, children:[ new TextRun((idx+1)+". "+t.title) ] }));
+        children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children:[ new TextRun("Resumen") ] }));
+        children.push(new Paragraph({ children:[ new TextRun(t.summary || summarizeTopic(t) || "(sin resumen)") ] }));
+        children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing:{before:150}, children:[ new TextRun("Transcripción completa") ] }));
+        if(t.segments.length){
+          t.segments.forEach(s=>{
+            children.push(new Paragraph({ children:[
+              new TextRun({ text: s.time ? "["+s.time+"] " : "", color:"888888" }),
+              new TextRun(s.text)
+            ]}));
+          });
+        } else {
+          children.push(new Paragraph({ children:[ new TextRun("(sin transcripción)") ] }));
+        }
+      });
+
+      const doc = new Document({ sections: [{ properties:{}, children }] });
+      const blob = await Packer.toBlob(doc);
+      await saveWithDownloads(safeFilename(cls.title)+".docx", blob);
+    }catch(err){
+      toast("Ocurrió un error generando el Word: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  /* ---------------- export: pdf ---------------- */
+  function exportPdf(){
+    const cls = currentClass();
+    if(!cls || !window.jspdf){ toast("No se pudo cargar el generador de PDF."); return; }
+    try{
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit:"pt", format:"a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 48;
+      const maxW = pageW - margin*2;
+      let y = margin;
+
+      function ensureSpace(lineH){
+        if(y + lineH > pageH - margin){ pdf.addPage(); y = margin; }
+      }
+      function writeBlock(text, size, style, gapAfter, color){
+        pdf.setFontSize(size);
+        pdf.setFont("helvetica", style || "normal");
+        pdf.setTextColor(color || "#1c232c");
+        const lines = pdf.splitTextToSize(text, maxW);
+        const lineH = size*1.32;
+        lines.forEach(line=>{
+          ensureSpace(lineH);
+          pdf.text(line, margin, y);
+          y += lineH;
+        });
+        y += gapAfter || 4;
+      }
+
+      writeBlock(cls.title, 18, "bold", 4);
+      writeBlock("Fecha: "+todayLabel(cls.dateISO), 10, "italic", 14, "#5b6472");
+
+      cls.topics.forEach((t, idx)=>{
+        writeBlock((idx+1)+". "+t.title, 14, "bold", 6);
+        writeBlock("Resumen", 10.5, "bold", 2, "#2b5fa8");
+        writeBlock(t.summary || summarizeTopic(t) || "(sin resumen)", 10.5, "normal", 10);
+        writeBlock("Transcripción completa", 10.5, "bold", 2, "#2b5fa8");
+        if(t.segments.length){
+          t.segments.forEach(s=>{
+            writeBlock((s.time ? "["+s.time+"] " : "") + s.text, 10, "normal", 2);
+          });
+        } else {
+          writeBlock("(sin transcripción)", 10, "normal", 2);
+        }
+        y += 8;
+      });
+
+      const blob = pdf.output("blob");
+      saveWithDownloads(safeFilename(cls.title)+".pdf", blob);
+    }catch(err){
+      toast("Ocurrió un error generando el PDF: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  /* ---------------- export/import json ---------------- */
+  function exportJson(){
+    const cls = currentClass();
+    if(!cls) return;
+    const blob = new Blob([JSON.stringify(cls, null, 2)], {type:"application/json"});
+    saveWithDownloads(safeFilename(cls.title)+".json", blob);
+  }
+
+  function importJson(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      try{
+        const obj = JSON.parse(reader.result);
+        if(!obj || !Array.isArray(obj.topics)) throw new Error("Formato no reconocido");
+        obj.id = uid();
+        obj.demo = false;
+        state.classes.push(obj);
+        state.currentClassId = obj.id;
+        currentTopicId = null;
+        save();
+        renderAll();
+        toast("Clase importada correctamente.");
+      }catch(err){
+        toast("No se pudo importar el archivo: " + (err && err.message ? err.message : err));
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  function safeFilename(title){
+    return (title||"clase").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9\- ]/g,"").trim().replace(/\s+/g,"_").slice(0,60) || "clase";
+  }
+
+  function plainBrowserDownload(filename, blob){
+    try{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+      toast("Archivo descargado: " + filename);
+    }catch(err){
+      toast("No se pudo descargar el archivo: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  async function saveWithDownloads(filename, blob){
+    const hasClaudeDownloads = (typeof window.claude !== "undefined") && (typeof window.claude.use === "function");
+    if(!hasClaudeDownloads){
+      plainBrowserDownload(filename, blob);
+      return;
+    }
+    try{
+      const downloads = await window.claude.use("downloads");
+      if(!downloads){
+        plainBrowserDownload(filename, blob);
+        return;
+      }
+      await downloads.save({ filename, data: blob });
+      toast("Archivo guardado: " + filename);
+    }catch(err){
+      if(err && err.code === "declined"){ return; }
+      plainBrowserDownload(filename, blob);
+    }
+  }
+
+  /* ---------------- new class ---------------- */
+  function newClass(){
+    const c = {
+      id: uid(),
+      title: "Clase sin título",
+      demo: false,
+      dateISO: new Date().toISOString(),
+      recordingStartedAt: null,
+      topics: []
+    };
+    state.classes.push(c);
+    state.currentClassId = c.id;
+    currentTopicId = null;
+    save();
+    renderAll();
+    const input = document.getElementById("classTitleInput");
+    if(input){ input.focus(); input.select(); }
+  }
+
+  /* ---------------- init ---------------- */
+  function renderAll(){
+    renderClassList();
+    renderMain();
+  }
+
+  function init(){
+    const had = load();
+    if(!had){
+      const demo = demoClass();
+      state.classes = [demo];
+      state.currentClassId = demo.id;
+    } else if(!state.currentClassId && state.classes.length){
+      state.currentClassId = state.classes[0].id;
+    }
+    document.getElementById("btnNewClass").addEventListener("click", newClass);
+    renderAll();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
